@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЖИТЕЛЬ ДРОП</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    user-select: none;
+  }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #1e2a1a, #0a0f08 80%);
+    color: #e8f5e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 6vw, 52px);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #7CFC00;
+    text-shadow: 0 0 20px #3a7d00, 0 0 40px #1d4000;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .subtitle {
+    color: #a4c98f;
+    font-size: 14px;
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+    opacity: 0.8;
+  }
+
+  /* ===== МЕНЮ ===== */
+  .menu-bar {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(20, 35, 15, 0.85);
+    border: 2px solid #3a7d00;
+    border-radius: 14px;
+    padding: 14px 22px;
+    margin-bottom: 30px;
+    box-shadow: 0 0 25px rgba(60, 200, 20, 0.25);
+  }
+
+  .menu-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #b6ff8a;
+    letter-spacing: 2px;
+  }
+
+  .attempt-counter {
+    font-size: 18px;
+    font-weight: bold;
+    background: #0f1a0a;
+    color: #7CFC00;
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid #4caf00;
+    box-shadow: inset 0 0 10px rgba(124, 252, 0, 0.3);
+    white-space: nowrap;
+  }
+
+  /* ===== КЕЙС И РУЛЕТКА ===== */
+  .case-container {
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+  }
+
+  .roulette-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background: #0d140a;
+    border: 3px solid #3a7d00;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 0 60px #000, 0 0 30px rgba(60, 200, 20, 0.3);
+    margin-bottom: 30px;
+  }
+
+  .center-marker {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: #ff3b3b;
+    z-index: 10;
+    box-shadow: 0 0 18px #ff0000, 0 0 6px #fff;
+  }
+  .center-marker::before,
+  .center-marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+  }
+  .center-marker::before {
+    top: -6px;
+    border-top: 14px solid #ff3b3b;
+  }
+  .center-marker::after {
+    bottom: -6px;
+    border-bottom: 14px solid #ff3b3b;
+  }
+
+  .roulette-track {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    will-change: transform;
+  }
+
+  .roulette-item {
+    flex: 0 0 140px;
+    height: 140px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    transition: transform 0.2s;
+  }
+
+  .roulette-item .icon {
+    font-size: 38px;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+
+  .roulette-item .label {
+    font-size: 12px;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .r-common   { background: linear-gradient(160deg, #3d3d3d, #1f1f1f); }
+  .r-uncommon { background: linear-gradient(160deg, #2e7d32, #1b4d1e); }
+  .r-rare     { background: linear-gradient(160deg, #1565c0, #0d3b73); }
+  .r-epic     { background: linear-gradient(160deg, #6a1b9a, #3b0f57); }
+  .r-legend   { background: linear-gradient(160deg, #b8860b, #6b4c00); box-shadow: 0 0 18px #ffd700; }
+  .r-mythic   { background: linear-gradient(160deg, #c62828, #6d0000); box-shadow: 0 0 25px #ff4444; }
+
+  /* ===== КНОПКА ===== */
+  .open-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 18px 60px;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #0a0f08;
+    background: linear-gradient(180deg, #a8ff60, #4caf00);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #2e6b00, 0 0 30px rgba(120, 255, 60, 0.6);
+    transition: all 0.1s;
+  }
+  .open-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 0 #2e6b00, 0 0 45px rgba(120, 255, 60, 0.9);
+  }
+  .open-btn:active:not(:disabled) {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 #2e6b00, 0 0 20px rgba(120, 255, 60, 0.5);
+  }
+  .open-btn:disabled {
+    filter: grayscale(0.8);
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: 0 8px 0 #2e6b00;
+    transform: translateY(0);
+  }
+
+  /* ===== РЕЗУЛЬТАТ ===== */
+  .result-box {
+    margin-top: 30px;
+    text-align: center;
+    min-height: 70px;
+  }
+
+  .result-box .drop-title {
+    font-size: 16px;
+    color: #a4c98f;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .result-box .drop-name {
+    font-size: 30px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 15px currentColor;
+    display: inline-block;
+    padding: 10px 30px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+
+  /* ===== ТАБЛИЦА ШАНСОВ ===== */
+  .chances {
+    margin-top: 45px;
+    width: 100%;
+    max-width: 900px;
+    background: rgba(15, 25, 10, 0.7);
+    border: 2px solid #2e5a1e;
+    border-radius: 14px;
+    padding: 20px 25px;
+  }
+  .chances h2 {
+    font-size: 18px;
+    color: #7CFC00;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .chance-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .chance-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 4px solid #4caf00;
+  }
+  .chance-row span:last-child {
+    color: #b6ff8a;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+  <h1>ЖИТЕЛЬ ДРОП</h1>
+  <div class="subtitle">ОТКРЫВАЙ КЕЙСЫ • ЛОВИ ДРОП</div>
+
+  <div class="menu-bar">
+    <div class="menu-title">🎁 ПОПЫТКА 3 ИЗУМРУДА</div>
+    <div class="attempt-counter" id="attemptCounter">Попыток: ∞</div>
+  </div>
+
+  <div class="case-container">
+    <div class="roulette-wrapper">
+      <div class="center-marker"></div>
+      <div class="roulette-track" id="rouletteTrack"></div>
+    </div>
+
+    <button class="open-btn" id="openBtn">ОТКРЫТЬ КЕЙС</button>
+
+    <div class="result-box" id="resultBox"></div>
+  </div>
+
+  <div class="chances">
+    <h2>📊 ШАНСЫ ВЫПАДЕНИЯ</h2>
+    <div class="chance-list" id="chanceList"></div>
+  </div>
+
+<script>
+  /* ================= ДАННЫЕ ПРЕДМЕТОВ ================= */
+  const ITEMS = [
+    { name: '1 палка',             icon: '🪵', chance: 90, rarity: 'common'   },
+    { name: 'стак грязи',          icon: '🪣', chance: 80, rarity: 'common'   },
+    { name: 'яйко',                icon: '🥚', chance: 70, rarity: 'uncommon' },
+    { name: '28 бульбы',           icon: '🥔', chance: 60, rarity: 'uncommon' },
+    { name: 'железо',              icon: '⛓️', chance: 50, rarity: 'rare'     },
+    { name: '5 алмазов',           icon: '💎', chance: 40, rarity: 'rare'     },
+    { name: 'слуга голем',         icon: '🗿', chance: 30, rarity: 'epic'     },
+    { name: '100 изумрудов',       icon: '💚', chance: 20, rarity: 'legend'   },
+    { name: 'титул «ЖИТЕЛЬ ХУЛИГАН»', icon: '👑', chance: 10, rarity: 'mythic' }
+  ];
+
+  /* ================= СОСТОЯНИЕ ================= */
+  let isSpinning = false;
+
+  const track       = document.getElementById('rouletteTrack');
+  const openBtn     = document.getElementById('openBtn');
+  const resultBox   = document.getElementById('resultBox');
+  const counterEl   = document.getElementById('attemptCounter');
+
+  /* ================= ЗВУКИ (Web Audio API) ================= */
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  // Короткий «тик» во время прокрутки
+  function playTick() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.05);
+    } catch(e) {}
+  }
+
+  // Фанфара при выпадении приза (в зависимости от редкости)
+  function playWin(rarity) {
+    try {
+      const ctx = getAudioCtx();
+      let notes;
+      if (rarity === 'mythic')      notes = [523, 659, 784, 1047, 1319, 1568];
+      else if (rarity === 'legend') notes = [523, 659, 784, 1047, 1319];
+      else if (rarity === 'epic')   notes = [523, 659, 784, 1047];
+      else if (rarity === 'rare')   notes = [523, 659, 784];
+      else                          notes = [523, 659];
+
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.12;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.25, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.45);
+      });
+    } catch(e) {}
+  }
+
+  // Клик по кнопке
+  function playClick() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.13);
+    } catch(e) {}
+  }
+
+  /* ================= ТАБЛИЦА ШАНСОВ ================= */
+  const chanceList = document.getElementById('chanceList');
+  ITEMS.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'chance-row';
+    row.innerHTML = `<span>${item.icon} ${item.name}</span><span>${item.chance}%</span>`;
+    chanceList.appendChild(row);
+  });
+
+  /* ================= ВЫБОР ПРЕДМЕТА ================= */
+  function rollItem() {
+    const totalWeight = ITEMS.reduce((s, i) => s + i.chance, 0);
+    let r = Math.random() * totalWeight;
+    for (const item of ITEMS) {
+      if (r < item.chance) return item;
+      r -= item.chance;
+    }
+    return ITEMS[ITEMS.length - 1];
+  }
+
+  /* ================= ЛЕНТА ================= */
+  function createItemElement(item) {
+    const div = document.createElement('div');
+    div.className = `roulette-item r-${item.rarity}`;
+    div.innerHTML = `
+      <div class="icon">${item.icon}</div>
+      <div class="label">${item.name}</div>
+    `;
+    return div;
+  }
+
+  function buildTrack(extraItems = 60) {
+    track.innerHTML = '';
+    for (let i = 0; i < extraItems; i++) {
+      const randomItem = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+      track.appendChild(createItemElement(randomItem));
+    }
+  }
+
+  /* ================= ПРОКРУТ ================= */
+  const ITEM_WIDTH = 150;
+
+  function spin() {
+    if (isSpinning) return;
+    isSpinning = true;
+    openBtn.disabled = true;
+    resultBox.innerHTML = '';
+
+    playClick();
+
+    const winItem = rollItem();
+
+    const totalItems = 80;
+    const winIndex = Math.floor(Math.random() * 20) + 55;
+
+    track.innerHTML = '';
+    for (let i = 0; i < totalItems; i++) {
+      let item;
+      if (i === winIndex) item = winItem;
+      else item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+      track.appendChild(createItemElement(item));
+    }
+
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0px)';
+
+    const wrapperWidth = track.parentElement.clientWidth;
+    const itemCenter = winIndex * ITEM_WIDTH + ITEM_WIDTH / 2;
+    const targetShift = itemCenter - wrapperWidth / 2;
+    const randomOffset = (Math.random() - 0.5) * 60;
+    const finalShift = targetShift + randomOffset;
+
+    // Звук «тика» во время прокрутки — плавно замедляющийся
+    let tickCount = 0;
+    const maxTicks = 40;
+    function scheduleTick() {
+      if (tickCount >= maxTicks) return;
+      tickCount++;
+      playTick();
+      // Интервалы растут со временем — тиканье замедляется
+      const progress = tickCount / maxTicks;
+      const delay = 60 + progress * progress * 700;
+      setTimeout(scheduleTick, delay);
+    }
+    scheduleTick();
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        track.style.transition = 'transform 5s cubic-bezier(0.1, 0.7, 0.1, 1)';
+        track.style.transform = `translateX(-${finalShift}px)`;
+      });
+    });
+
+    track.addEventListener('transitionend', function onEnd() {
+      track.removeEventListener('transitionend', onEnd);
+      finishSpin(winItem);
+    });
+  }
+
+  function finishSpin(winItem) {
+    isSpinning = false;
+    openBtn.disabled = false;
+
+    playWin(winItem.rarity);
+
+    resultBox.innerHTML = `
+      <div class="drop-title">ВЫПАЛО:</div>
+      <div class="drop-name" style="color: ${
+        winItem.rarity === 'mythic' ? '#ff6b6b' :
+        winItem.rarity === 'legend' ? '#ffd700' :
+        winItem.rarity === 'epic'   ? '#ce93d8' :
+        winItem.rarity === 'rare'   ? '#64b5f6' :
+        winItem.rarity === 'uncommon' ? '#81c784' : '#e0e0e0'
+      }">${winItem.icon} ${winItem.name}</div>
+    `;
+  }
+
+  /* ================= ИНИЦИАЛИЗАЦИЯ ================= */
+  function init() {
+    buildTrack();
+    openBtn.addEventListener('click', spin);
+  }
+
+  init();
+</script>
+</body>
+</html>
